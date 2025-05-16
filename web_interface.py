@@ -335,6 +335,10 @@ def init_session_state():
     # Mode d'affichage ("temp" pour afficher uniquement la question actuelle, "history" pour l'historique complet)
     if 'display_mode' not in st.session_state:
         st.session_state.display_mode = "history"
+    
+    # Initialiser le modèle par défaut
+    if 'current_model' not in st.session_state:
+        st.session_state.current_model = "gpt-4.1"
 
 # Fonction pour traiter la question et obtenir une réponse
 def process_question(question):
@@ -358,6 +362,10 @@ def process_question(question):
         st.session_state.display_mode = "history"
         st.rerun()
         return
+    
+    # S'assurer que current_model est initialisé
+    if 'current_model' not in st.session_state:
+        st.session_state.current_model = "gpt-4.1"  # Modèle par défaut
     
     # Initialiser le système RAG si nécessaire
     if 'piaget_rag' not in st.session_state or st.session_state.piaget_rag is None:
@@ -497,11 +505,22 @@ def render_model_controls():
                 elif 'current_model' not in st.session_state:
                     st.session_state.current_model = selected
             
+            # S'assurer que current_model est initialisé
+            if 'current_model' not in st.session_state:
+                st.session_state.current_model = "gpt-4.1"
+                
             # Sélection du modèle avec radio buttons et callback
+            try:
+                default_index = list(models.keys()).index(st.session_state.current_model)
+            except ValueError:
+                # Si le modèle actuel n'est pas dans la liste, utiliser le premier modèle
+                default_index = 0
+                st.session_state.current_model = list(models.keys())[0]
+                
             selected_model = st.radio(
                 "Choisissez un modèle :",
                 list(models.keys()),
-                index=list(models.keys()).index(st.session_state.current_model) if 'current_model' in st.session_state else 0,
+                index=default_index,
                 key="model_selection",
                 on_change=on_model_change
             )
