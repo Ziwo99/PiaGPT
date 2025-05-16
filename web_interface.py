@@ -321,20 +321,10 @@ def format_sources_with_links(sources_text):
 
 # Fonction pour initialiser l'état de session
 def init_session_state():
-    # Initialiser la clé API si elle n'existe pas déjà
+    # Initialiser les variables d'état de session si elles n'existent pas déjà
     if 'api_key' not in st.session_state:
         st.session_state.api_key = ""
     
-    # Initialiser le modèle RAG s'il n'existe pas déjà
-    if 'piaget_rag' not in st.session_state:
-        # Définir le modèle par défaut
-        if 'current_model' not in st.session_state:
-            st.session_state.current_model = "gpt-4.1-nano"
-            
-        # Initialiser le RAG avec le modèle sélectionné et la clé API
-        st.session_state.piaget_rag = PiagetRAG(model_name=st.session_state.current_model, api_key=st.session_state.api_key)
-    
-    # Historique permanent des messages
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
     
@@ -360,9 +350,33 @@ def process_question(question):
     # Ajouter la question à l'historique permanent
     st.session_state.chat_history.append({"role": "user", "content": question})
     
-    # Obtenir la réponse (utilise automatiquement le nombre maximum de sources défini dans piaget_rag.py)
-    raw_answer = st.session_state.piaget_rag.answer_question(question)
-    formatted_answer = format_response(raw_answer)
+    # Vérifier si la clé API est fournie
+    if not st.session_state.api_key:
+        error_message = "Veuillez entrer votre clé API OpenAI dans l'onglet API des paramètres pour pouvoir utiliser PiaGPT."
+        st.session_state.chat_history.append({"role": "assistant", "content": error_message})
+        st.session_state.temp_history.append({"role": "assistant", "content": error_message})
+        st.session_state.display_mode = "history"
+        st.rerun()
+        return
+    
+    # Initialiser le système RAG si nécessaire
+    if 'piaget_rag' not in st.session_state or st.session_state.piaget_rag is None:
+        try:
+            st.session_state.piaget_rag = PiagetRAG(model_name=st.session_state.current_model, api_key=st.session_state.api_key)
+        except Exception as e:
+            error_message = f"Erreur lors de l'initialisation du système RAG: {str(e)}"
+            st.session_state.chat_history.append({"role": "assistant", "content": error_message})
+            st.session_state.temp_history.append({"role": "assistant", "content": error_message})
+            st.session_state.display_mode = "history"
+            st.rerun()
+            return
+    
+    # Obtenir la réponse du système RAG
+    try:
+        raw_answer = st.session_state.piaget_rag.answer_question(question)
+        formatted_answer = format_response(raw_answer)
+    except Exception as e:
+        formatted_answer = f"Erreur lors de la génération de la réponse: {str(e)}"
     
     # Ajouter la réponse à l'historique permanent
     st.session_state.chat_history.append({"role": "assistant", "content": formatted_answer})
@@ -666,23 +680,24 @@ def main():
     
     # Traiter la question si elle existe (soit depuis la saisie, soit depuis les suggestions)
     if question_to_process:
-        # Vérifier si une clé API a été fournie
-        if not st.session_state.api_key:
-            st.error("Veuillez entrer votre clé API OpenAI dans l'onglet API des paramètres pour pouvoir utiliser PiaGPT.")
-        else:
-            # Afficher immédiatement la question et l'indicateur de réflexion
-            with chat_container:
-                # Afficher la question de l'utilisateur
-                with st.chat_message("user"):
-                    st.markdown(question_to_process)
-                
+        # Afficher immédiatement la question et l'indicateur de réflexion
+        with chat_container:
+            # Afficher la question de l'utilisateur
+            with st.chat_message("user"):
+                st.markdown(question_to_process)
+            
+            # Vérifier si une clé API a été fournie
+            if not st.session_state.api_key:
+                with st.chat_message("assistant", avatar="🧠"):
+                    st.error("Veuillez entrer votre clé API OpenAI dans l'onglet API des paramètres pour pouvoir utiliser PiaGPT.")
+            else:
                 # Afficher l'indicateur de réflexion
                 with st.chat_message("assistant", avatar="🧠"):
                     st.markdown("<p class='thinking'>Jean Piaget réfléchit...</p>", unsafe_allow_html=True)
-            
-            # Basculer en mode temporaire pour n'afficher que la question en cours
-            st.session_state.display_mode = "temp"
-            process_question(question_to_process)
+                
+                # Basculer en mode temporaire pour n'afficher que la question en cours
+                st.session_state.display_mode = "temp"
+                process_question(question_to_process)
 
 if __name__ == "__main__":
     main()
