@@ -137,7 +137,7 @@ PiaGPT vous permet de choisir entre différents modèles OpenAI :
 
 ## Configuration de l'API
 
-Vous pouvez configurer votre clé API OpenAI directement dans l'interface web, dans le volet "Paramètres API". La clé est stockée uniquement dans la session Streamlit et n'est pas sauvegardée entre les sessions.
+Vous pouvez configurer votre clé API OpenAI directement dans l'interface web, dans le volet "Paramètres API" (appuyer sur ENTER après avoir entré la clé). La clé est stockée uniquement dans la session Streamlit et n'est pas sauvegardée entre les sessions.
 
 ## Personnalisation
 
