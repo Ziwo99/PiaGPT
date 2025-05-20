@@ -530,9 +530,33 @@ def render_model_controls():
         
         # Onglet Informations
         with tab_info:
-            st.write("Ce système utilise automatiquement le maximum de sources pertinentes pour répondre à vos questions sur la pensée de Jean Piaget.")
-            st.write(f"**Modèle actuel** : {selected_model}")
-            st.write("**Développé par** : Équipe PiaGPT")
+            st.markdown("### ℹ️ À propos de PiaGPT")
+            st.write(
+                "PiaGPT est un système conversationnel basé sur une architecture RAG (Retrieval-Augmented Generation). "
+                "Il permet de dialoguer avec un avatar de Jean Piaget qui s’exprime à la première personne, en s’appuyant sur ses textes originaux. "
+                "Le système effectue une recherche sémantique dans un corpus vectorisé d’extraits issus de plus de 1000 documents, "
+                "puis génère des réponses contextualisées et sourcées via un modèle de langage (GPT-4, GPT-4o, etc.)."
+            )
+
+            st.markdown("### 🧠 Objectif pédagogique")
+            st.write(
+                "L’objectif de PiaGPT est de rendre accessibles les théories complexes de Jean Piaget de manière interactive, "
+                "notamment pour les étudiants, les enseignants et les curieux. "
+                "Le système encourage une exploration guidée par la curiosité et soutient la pensée critique à travers un dialogue socratique."
+            )
+
+            st.markdown("### 👥 Équipe du projet")
+            st.write("- **Nazim Allaoua**")
+            st.write("- **Daniel Teixeira**")
+            st.write("- **Bauch Saleh**")
+            st.write("- **Joël Cori**")
+
+            st.markdown("### 🙏 Remerciements")
+            st.write(
+                "Nous remercions chaleureusement le **Centre Jean Piaget** pour l’accès libre à l’intégralité des œuvres publiées de Jean Piaget "
+                "via leur site [oeuvres.unige.ch](https://oeuvres.unige.ch). "
+                "Ces documents constituent la base essentielle de PiaGPT et permettent une interaction fidèle et rigoureuse avec la pensée de Piaget."
+            )
 
 # Fonction pour afficher des suggestions de questions structurées
 def render_question_suggestions():
